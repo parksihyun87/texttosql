@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmd /c \"conda activate t2sq && del alembic\\\\versions\\\\450fdb34eaf3_init.py && alembic revision --autogenerate -m init\")"
+    ]
+  }
+}
