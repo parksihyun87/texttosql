@@ -7,3 +7,4 @@ pydantic
 sqlglot
 openai
 alembic
+psycopg2-binary
