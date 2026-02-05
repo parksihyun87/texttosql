@@ -360,9 +360,10 @@ if st.session_state.pending_question:
     prompt = st.session_state.pending_question
     st.session_state.pending_question = None
 
-# 사용자 입력
+# 사용자 입력 - 항상 표시 (조건 없이)
+user_input = st.chat_input("질문을 입력하세요...")
 if not prompt:
-    prompt = st.chat_input("질문을 입력하세요...")
+    prompt = user_input
 
 if prompt:
     # 사용자 메시지 추가
