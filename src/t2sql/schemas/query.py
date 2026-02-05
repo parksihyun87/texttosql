@@ -23,6 +23,7 @@ class GenerateQuestionsRequest(BaseModel):
     total_questions: Optional[int] = None
     seed: Optional[int] = None
     include_schema_context: bool = False
+    type_ids: Optional[List[int]] = None  # 특정 유형만 생성 (1-7)
 
 
 class GenerateQuestionsResponse(BaseModel):

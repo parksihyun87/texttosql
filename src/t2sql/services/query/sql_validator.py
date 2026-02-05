@@ -11,25 +11,30 @@ FORCE_LIMIT = 2000
 class SqlRejected(Exception):
     pass
 
+def _extract_cte_names(ast: exp.Expression) -> set[str]:
+    """WITH 절에서 정의된 CTE 이름들을 추출"""
+    cte_names: set[str] = set()
+    for cte in ast.find_all(exp.CTE):
+        if cte.alias:
+            cte_names.add(cte.alias)
+    return cte_names
+
+
 def _extract_table_names(ast: exp.Expression) -> set[str]:
     """
-    AST에서 참조된 테이블 이름들을 추출.
-    - schema.table 형태면 table만 or schema.table 전체를 쓸지 정책 결정 필요
+    AST에서 참조된 실제 테이블 이름들을 추출.
+    CTE 별칭은 제외함.
     """
     names: set[str] = set()
+    cte_names = _extract_cte_names(ast)
 
-    #from/join 등에 등장하는 exp.table 노드들을 훑음
+    # from/join 등에 등장하는 exp.Table 노드들을 훑음
     for t in ast.find_all(exp.Table):
-        # t.name: 테이블명(예: fact_production_daily)
-        # t.db: 스키마명(있으면)
-        # t.catalog: 카탈로그명(있으면)
         table = t.name
+        # CTE 별칭은 실제 테이블이 아니므로 제외
+        if table not in cte_names:
+            names.add(table)
 
-        # 스키마까지 포함해서 관리하고 싶으면:
-        # if t.db: table = f"{t.db}.{t.name}"
-        
-        names.add(table)
-    
     return names
 
 

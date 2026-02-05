@@ -13,4 +13,4 @@ RUN pip install .
 
 # Railway uses $PORT env var, default to 8000 for local
 ENV PORT=8000
-CMD uvicorn t2sql.main:app --host 0.0.0.0 --port $PORT
+CMD ["sh", "-c", "uvicorn t2sql.main:app --host 0.0.0.0 --port $PORT"]

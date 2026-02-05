@@ -21,6 +21,7 @@ def generate_questions(req: GenerateQuestionsRequest):
     questions = generate_edge_questions_with_llm(
         total_questions=total_questions,
         seed=req.seed,
+        type_ids=req.type_ids,
     )
     items = [
         EdgeQuestionItem(

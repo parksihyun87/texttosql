@@ -63,12 +63,19 @@ def generate_edge_questions_with_llm(
     total_questions: int = 7,
     seed: Optional[int] = None,
     base_date: Optional[date] = None,
+    type_ids: Optional[List[int]] = None,
 ) -> List[EdgeQuestion]:
     base_date = base_date or date.today()
     base_year = base_date.year
     base_month = base_date.month
 
     schema_context = build_full_schema_context()
+
+    # 특정 유형만 생성할 경우 유형 정의 필터링
+    type_filter_note = ""
+    if type_ids:
+        filtered_types = [f"{tid}) {_TYPE_NAMES.get(tid, 'unknown')}" for tid in type_ids if tid in _TYPE_NAMES]
+        type_filter_note = f"\n- 오직 다음 유형만 생성: {', '.join(filtered_types)}"
 
     prompt = f"""
 너는 Text-to-SQL 평가를 위한 "엣지 질문" 생성기다.
@@ -91,8 +98,7 @@ def generate_edge_questions_with_llm(
 - 질문에 "올해/이번달"만 있으면 위 기준으로 해석
 
 [요구사항]
-- 총 {total_questions}개 생성
-- 7개 유형이 최대한 골고루 포함되도록 구성
+- 총 {total_questions}개 생성{type_filter_note}
 - 서로 다른 표현/조건/기간/숫자 변형
 - 스키마 컨텍스트에 없는 테이블/컬럼/값은 사용하지 말 것
 - 출력은 JSON 배열만. 각 원소 형식:

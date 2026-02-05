@@ -4,6 +4,8 @@ Text-to-SQL Streamlit Frontend
 """
 import os
 import json
+from pathlib import Path
+import base64
 import requests
 import streamlit as st
 
@@ -34,15 +36,60 @@ def check_health() -> bool:
         return False
 
 
+def generate_creative_questions() -> list:
+    """창의적 질문(type_id=7) 생성 API 호출"""
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/api/questions/generate",
+            json={"total_questions": 3, "type_ids": [7]},
+            timeout=30
+        )
+        response.raise_for_status()
+        data = response.json()
+        return [q["question"] for q in data.get("questions", [])]
+    except requests.exceptions.RequestException:
+        return []
+
+
 # Streamlit 앱 설정
+BASE_DIR = Path(__file__).resolve().parent
+ASKING_DOG = BASE_DIR / "img" / "asking_dog_2.png"
+
+def _image_as_data_uri(path: Path) -> str:
+    data = path.read_bytes()
+    b64 = base64.b64encode(data).decode("ascii")
+    return f"data:image/png;base64,{b64}"
 st.set_page_config(
     page_title="Text-to-SQL",
-    page_icon="💬",
+    page_icon=str(ASKING_DOG),
     layout="wide"
 )
 
-st.title("💬 데이터 챗봇")
-st.caption("생산/주문 데이터에 대해 자연어로 질문하세요")
+dog_uri = _image_as_data_uri(ASKING_DOG)
+st.markdown(
+    f"""
+    <div style="display:flex; align-items:flex-end; gap:6px;">
+      <img src="{dog_uri}" style="height:72px; width:auto; display:block; margin:0;" />
+      <div style="display:flex; align-items:baseline; gap:10px;">
+        <span style="font-size:36px; font-weight:700; line-height:1;">SQL 물어보개</span>
+        <span style="font-size:14px; color:#6b7280; line-height:1;">생산/주문 데이터에 대해 자연어로 질문하세요</span>
+      </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# 세션 상태 초기화 (사이드바보다 먼저)
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "session_id" not in st.session_state:
+    st.session_state.session_id = os.urandom(8).hex()
+if "pending_question" not in st.session_state:
+    st.session_state.pending_question = None
+if "generating_creative" not in st.session_state:
+    st.session_state.generating_creative = False
+if "creative_questions" not in st.session_state:
+    st.session_state.creative_questions = []
 
 # 사이드바
 with st.sidebar:
@@ -74,15 +121,40 @@ with st.sidebar:
 
     st.divider()
     st.markdown("**예시 질문:**")
-    st.markdown("- 이번 달 총 생산량은?")
-    st.markdown("- 최근 주문 현황 알려줘")
-    st.markdown("- 공정별 생산량 비교해줘")
 
-# 세션 상태 초기화
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-if "session_id" not in st.session_state:
-    st.session_state.session_id = os.urandom(8).hex()
+    # 클릭 가능한 예시 질문 버튼
+    example_questions = [
+        "이번 달 총 생산량은?",
+        "최근 주문 현황 알려줘",
+        "공정별 생산량 비교해줘",
+    ]
+
+    for q in example_questions:
+        if st.button(f"💬 {q}", key=f"example_{q}", use_container_width=True):
+            st.session_state.pending_question = q
+            st.rerun()
+
+    st.divider()
+    st.markdown("**까다로운 질문 생성:**")
+    if st.button("🎯 창의적 질문 생성", key="gen_creative", use_container_width=True):
+        st.session_state.generating_creative = True
+        st.rerun()
+
+# 창의적 질문 생성 처리
+if st.session_state.generating_creative:
+    with st.spinner("창의적 질문 생성 중..."):
+        st.session_state.creative_questions = generate_creative_questions()
+    st.session_state.generating_creative = False
+    st.rerun()
+
+# 생성된 창의적 질문 사이드바에 표시
+if st.session_state.creative_questions:
+    with st.sidebar:
+        st.markdown("**생성된 질문:**")
+        for i, q in enumerate(st.session_state.creative_questions):
+            if st.button(f"🎲 {q[:30]}..." if len(q) > 30 else f"🎲 {q}", key=f"creative_{i}", use_container_width=True):
+                st.session_state.pending_question = q
+                st.rerun()
 
 # 이전 메시지 표시
 for message in st.session_state.messages:
@@ -97,8 +169,17 @@ for message in st.session_state.messages:
             with st.expander(f"📊 결과 ({len(message['data'])}행)"):
                 st.dataframe(message["data"], use_container_width=True)
 
+# pending_question 처리 (예시 질문 클릭 시)
+prompt = None
+if st.session_state.pending_question:
+    prompt = st.session_state.pending_question
+    st.session_state.pending_question = None
+
 # 사용자 입력
-if prompt := st.chat_input("질문을 입력하세요..."):
+if not prompt:
+    prompt = st.chat_input("질문을 입력하세요...")
+
+if prompt:
     # 사용자 메시지 추가
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
