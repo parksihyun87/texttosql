@@ -28,6 +28,20 @@ def search_schema(q: str, k: int = 8):
             )
             return cur.fetchall()
 
+def fetch_all_schema():
+    """Return all schema metadata rows without vector search."""
+    with psycopg.connect(DB_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT doc_type, table_name, column_name, content,
+                       NULL AS distance
+                FROM schema_embeddings
+                ORDER BY table_name, column_name NULLS FIRST
+                """
+            )
+            return cur.fetchall()
+
 def search_fewshots(q: str, k: int = 3):
     """질문과 유사한 few-shot 예제를 검색"""
     qvec = embed_query(q)
