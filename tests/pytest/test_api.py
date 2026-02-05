@@ -4,6 +4,8 @@ API 엔드포인트 테스트
 - Query endpoints
 - Table endpoints
 - Chat endpoints
+
+실행: pytest tests/pytest/test_api.py -v
 """
 import pytest
 
@@ -145,6 +147,7 @@ class TestChatEndpoint:
 class TestQuestionGenerateEndpoint:
     """질문 생성 엔드포인트 테스트"""
 
+    @pytest.mark.slow
     def test_generate_creative_questions(self, client):
         """POST /api/questions/generate - 창의적 질문 생성 (type_id=7)"""
         response = client.post(
@@ -161,6 +164,7 @@ class TestQuestionGenerateEndpoint:
             assert "question" in q
             assert "rationale" in q
 
+    @pytest.mark.slow
     def test_generate_ambiguous_questions(self, client):
         """POST /api/questions/generate - 모호한 질문 생성 (type_id=8)"""
         response = client.post(
