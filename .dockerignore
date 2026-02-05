@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pytest_cache/
+.mypy_cache/
+
+# venv/conda
+.venv/
+venv/
+.env/
+.conda/
+
+# Git
+.git/
+.gitignore
+
+# Logs & misc
+*.log
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Docker compose override (선택)
+docker-compose.override.yml

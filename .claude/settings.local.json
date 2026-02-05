@@ -9,7 +9,13 @@
       "Bash(python:*)",
       "Bash(curl:*)",
       "Bash(powershell -Command \"Invoke-RestMethod -Uri ''http://localhost:8000/api/query'' -Method POST -ContentType ''application/json'' -Body ''{\"\"question\"\": \"\"매일 공정 테이블에서 작업 세션은 총 몇개?\"\"}'' | ConvertTo-Json -Depth 10\")",
-      "Bash(powershell -Command \"Invoke-RestMethod -Uri ''http://localhost:8000/api/query'' -Method POST -ContentType ''application/json'' -Body ''{\"\"question\"\": \"\"fact_production_daily 테이블과 fact_order_daily테이블을 이용하고, fact_order_daily에서 order_status가 출고 대기 인 물품의 ordered_qty만 더한 후 전체 생산 요구량으로 잡고,fact_production_daily에서 2월 현재 생산한 produced_qty 총합을 비교해 몇 요구량의 몇 퍼센트 달성되었는지 찾아줘\"\"}'' | ConvertTo-Json -Depth 10\")"
+      "Bash(powershell -Command \"Invoke-RestMethod -Uri ''http://localhost:8000/api/query'' -Method POST -ContentType ''application/json'' -Body ''{\"\"question\"\": \"\"fact_production_daily 테이블과 fact_order_daily테이블을 이용하고, fact_order_daily에서 order_status가 출고 대기 인 물품의 ordered_qty만 더한 후 전체 생산 요구량으로 잡고,fact_production_daily에서 2월 현재 생산한 produced_qty 총합을 비교해 몇 요구량의 몇 퍼센트 달성되었는지 찾아줘\"\"}'' | ConvertTo-Json -Depth 10\")",
+      "Bash(docker exec:*)",
+      "Bash(py:*)",
+      "Bash(where:*)",
+      "Bash(\"C:\\\\Users\\\\sihyun\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps\\\\python3.exe\" src/t2sql/scripts/embedding/embed_fewshot.py)",
+      "Bash(docker-compose build:*)",
+      "Bash(docker-compose up:*)"
     ]
   }
 }
