@@ -233,6 +233,25 @@ with st.sidebar:
         st.rerun()
 
     st.divider()
+    st.markdown("**8️⃣ 쉬운 자연어:**")
+    st.caption("초보자용 간단한 질문")
+
+    easy_questions = [
+        {"question": "공정 목록 보여줘", "hint": "dim_process 조회"},
+        {"question": "주문 현황 알려줘", "hint": "fact_order_daily 조회"},
+        {"question": "이번 달 생산 데이터 보여줘", "hint": "fact_production_daily 조회"},
+    ]
+
+    for i, eq in enumerate(easy_questions):
+        col1, col2 = st.columns([0.9, 0.1])
+        with col1:
+            if st.button(eq["question"], key=f"easy_{i}", use_container_width=True):
+                st.session_state.pending_question = eq["question"]
+                st.rerun()
+        with col2:
+            st.markdown(f"<span title='{eq['hint']}' style='cursor:help; font-size:16px;'>💡</span>", unsafe_allow_html=True)
+
+    st.divider()
     st.markdown("**📚 스키마 및 테이블:**")
 
     # 테이블 메타데이터 정의
