@@ -16,7 +16,18 @@
       "Bash(\"C:\\\\Users\\\\sihyun\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps\\\\python3.exe\" src/t2sql/scripts/embedding/embed_fewshot.py)",
       "Bash(docker-compose build:*)",
       "Bash(docker-compose up:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(psql:*)",
+      "Bash(set:*)",
+      "Bash(cmd /c \"python -m src.t2sql.scripts.embedding.embed_schema\")",
+      "Bash(conda info:*)",
+      "Bash(conda activate:*)",
+      "Bash(cmd /c \"conda activate t2sql && python -m src.t2sql.scripts.embedding.embed_schema\")",
+      "Bash(cmd /c \"conda run -n t2sql python -m src.t2sql.scripts.embedding.embed_schema\")",
+      "Bash(cmd /c \"conda env list\")",
+      "Bash(powershell -Command \"conda env list\":*)",
+      "Bash(powershell:*)",
+      "Bash(railway:*)"
     ]
   }
 }

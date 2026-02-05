@@ -13,6 +13,14 @@ def llm_generate_sql(question: str) -> str:
     base_year = str(today.year)
     base_month = f"{today.month:02d}"
 
+    # 다음 달 계산 (12월 -> 1월 처리)
+    next_month = today.month + 1
+    next_year = today.year
+    if next_month > 12:
+        next_month = 1
+        next_year += 1
+    next_month_str = f"{next_year}-{next_month:02d}-01"
+
     q = question.strip()
     rows = search_schema(q, k=8)
 
@@ -39,9 +47,12 @@ def llm_generate_sql(question: str) -> str:
     - 위험한 쿼리(INSERT/UPDATE/DELETE/DROP/ALTER) 금지
     - 아래 스키마 컨텍스트에 있는 것만 작성(추측 금지)
     - 날짜 규칙:
-    - 질문에 "올해"만 있으면 기준년도는 현재 년도({base_year})
-    - 질문에 "이번달"만 있고 날짜가 없으면 기준년도({base_year}), 기준월({base_month})
+    - 오늘 날짜: {base_year}-{base_month}-{today.day:02d}
+    - "올해" = {base_year}년
+    - "이번달"/"이번 달" = {base_year}년 {base_month}월
+    - "최근"/"최근 현황"/"최근 주문" = 이번 달({base_year}년 {base_month}월)로 해석
     - 기간은 [start, end) 반열림구간 사용 (end는 다음날/다음월 1일)
+    - 예: "이번달" → WHERE day >= '{base_year}-{base_month}-01' AND day < '{next_month_str}'
     - WHERE vs HAVING:
         - 집계함수(SUM/AVG/COUNT 등) 조건이면 HAVING
         - 기간/상태/상품 같은 필터는 WHERE
