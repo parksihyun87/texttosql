@@ -51,6 +51,21 @@ def generate_creative_questions() -> list:
         return []
 
 
+def generate_ambiguous_questions() -> list:
+    """엣지/모호 질문(type_id=8) 생성 API 호출"""
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/api/questions/generate",
+            json={"total_questions": 3, "type_ids": [8]},
+            timeout=30
+        )
+        response.raise_for_status()
+        data = response.json()
+        return [q["question"] for q in data.get("questions", [])]
+    except requests.exceptions.RequestException:
+        return []
+
+
 def extract_tables_from_sql(sql: str) -> list:
     """SQL에서 테이블명 추출"""
     import re
@@ -135,6 +150,10 @@ if "creative_questions" not in st.session_state:
     st.session_state.creative_questions = []
 if "expanded_tables" not in st.session_state:
     st.session_state.expanded_tables = set()
+if "generating_ambiguous" not in st.session_state:
+    st.session_state.generating_ambiguous = False
+if "ambiguous_questions" not in st.session_state:
+    st.session_state.ambiguous_questions = []
 
 # 상단 오른쪽에 세션/API 정보 표시
 with header_col2:
@@ -227,13 +246,7 @@ with st.sidebar:
             st.markdown(f"<span title='{eq['hint']}' style='cursor:help; font-size:16px;'>❓</span>", unsafe_allow_html=True)
 
     st.divider()
-    st.markdown("**7️⃣ 창의적 질문:**")
-    if st.button("🎲 AI가 생성한 질문 받기", key="gen_creative", use_container_width=True, help="스키마 기반 창의적 질문을 LLM이 생성합니다"):
-        st.session_state.generating_creative = True
-        st.rerun()
-
-    st.divider()
-    st.markdown("**8️⃣ 쉬운 자연어:**")
+    st.markdown("**7️⃣ 쉬운 자연어:**")
     st.caption("초보자용 간단한 질문")
 
     easy_questions = [
@@ -250,6 +263,18 @@ with st.sidebar:
                 st.rerun()
         with col2:
             st.markdown(f"<span title='{eq['hint']}' style='cursor:help; font-size:16px;'>💡</span>", unsafe_allow_html=True)
+
+    st.divider()
+    st.markdown("**8️⃣ 창의적 질문:**")
+    if st.button("🎲 AI가 생성한 질문 받기", key="gen_creative", use_container_width=True, help="스키마 기반 창의적 질문을 LLM이 생성합니다"):
+        st.session_state.generating_creative = True
+        st.rerun()
+
+    st.divider()
+    st.markdown("**9️⃣ 엣지/모호 질문:**")
+    if st.button("🎯 모호한 표현 질문 생성", key="gen_ambiguous", use_container_width=True, help="경계값/모호한 단어로 구성된 까다로운 질문"):
+        st.session_state.generating_ambiguous = True
+        st.rerun()
 
     st.divider()
     st.markdown("**📚 스키마 및 테이블:**")
@@ -325,9 +350,25 @@ if st.session_state.generating_creative:
 # 생성된 창의적 질문 사이드바에 표시
 if st.session_state.creative_questions:
     with st.sidebar:
-        st.markdown("**생성된 질문:**")
+        st.markdown("**생성된 창의적 질문:**")
         for i, q in enumerate(st.session_state.creative_questions):
             if st.button(f"🎲 {q[:30]}..." if len(q) > 30 else f"🎲 {q}", key=f"creative_{i}", use_container_width=True):
+                st.session_state.pending_question = q
+                st.rerun()
+
+# 엣지/모호 질문 생성 처리
+if st.session_state.generating_ambiguous:
+    with st.spinner("엣지/모호 질문 생성 중..."):
+        st.session_state.ambiguous_questions = generate_ambiguous_questions()
+    st.session_state.generating_ambiguous = False
+    st.rerun()
+
+# 생성된 엣지/모호 질문 사이드바에 표시
+if st.session_state.ambiguous_questions:
+    with st.sidebar:
+        st.markdown("**생성된 엣지/모호 질문:**")
+        for i, q in enumerate(st.session_state.ambiguous_questions):
+            if st.button(f"🎯 {q[:30]}..." if len(q) > 30 else f"🎯 {q}", key=f"ambiguous_{i}", use_container_width=True):
                 st.session_state.pending_question = q
                 st.rerun()
 

@@ -28,6 +28,7 @@ _TYPE_NAMES = {
     5: "join_product",
     6: "cte_ratio",
     7: "creative_schema",
+    8: "ambiguous_edge",
 }
 
 
@@ -91,6 +92,7 @@ def generate_edge_questions_with_llm(
 5) join_product: dim_process(또는 관련 테이블) 조인이 필요한 질문 (product 조건 포함)
 6) cte_ratio: 주문 vs 생산 같은 서로 다른 집계 결과 결합/비율 계산 질문 (CTE 필요)
 7) creative_schema: 스키마 컨텍스트에 있는 테이블/컬럼만 사용해 창의적이고 복합적인 질문
+8) ambiguous_edge: 모호하고 해석이 어려운 자연어 표현 (예: "요즘", "몇 개", "대충", "그거", "좀", "웬만한", "별로", "적당히", "나름", "꽤")을 포함한 질문. SQL로 번역할 때 명확한 기준이 필요한 표현 사용.
 
 [기준 날짜]
 - 기준년도: {base_year}
@@ -103,7 +105,7 @@ def generate_edge_questions_with_llm(
 - 스키마 컨텍스트에 없는 테이블/컬럼/값은 사용하지 말 것
 - 출력은 JSON 배열만. 각 원소 형식:
   {{
-    "type_id": 1~7,
+    "type_id": 1~8,
     "question": "...",
     "rationale": "왜 이 유형에 해당하는지 한 줄 설명"
   }}

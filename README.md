@@ -12,7 +12,7 @@ FastAPI 백엔드, PostgreSQL + pgvector, 임베딩 기반 RAG, few-shot 프롬�
 - few-shot 예제 임베딩 기반 유사도 검색
 - PostgreSQL + pgvector + HNSW(ANN) 인덱스 기반 검색
 - Docker Compose로 API/DB 구성
-- (옵션) SSE 기반 스트리밍 응답 설계
+- SSE 기반 스트리밍 응답 설계
 
 ---
 
@@ -148,7 +148,7 @@ streamlit run src/frontend/app.py
 
 ## 추가 문서
 
-- SSE/스트리밍 설계 문서: `docs/chatbot_plan.md`
+- 배포 관련 문서: `DEPLOY.md`
 
 ---
 
