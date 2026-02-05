@@ -7,8 +7,8 @@ from sqlalchemy import text
 
 router = APIRouter(prefix="/query", tags=["query"])
 
-@router.post("", response_model=QueryResponse) 
-def query(req: QueryRequest, db: Session = Depends(get_db)): 
-    result = run_nl_query(db, req.question)
+@router.post("", response_model=QueryResponse)
+def query(req: QueryRequest, db: Session = Depends(get_db)):
+    result = run_nl_query(db, req.question, role=req.role)
     result["meta"]["row_count"] = len(result.get("rows", []))
     return result

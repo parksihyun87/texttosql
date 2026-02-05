@@ -1,7 +1,11 @@
 import sqlglot
 from sqlglot import exp
 
-ALLOWED_TABLES = {"fact_production_daily"}
+# role별 허용 테이블
+ALLOWED_TABLES_BY_ROLE = {
+    "user": {"fact_production_daily", "fact_order_daily", "dim_process"},
+    "admin": {"fact_production_daily", "fact_order_daily", "dim_process", "dim_worker"},
+}
 FORCE_LIMIT = 2000
 
 class SqlRejected(Exception):
@@ -29,12 +33,12 @@ def _extract_table_names(ast: exp.Expression) -> set[str]:
     return names
 
 
-def validate_and_normalize(sql: str) -> str:
+def validate_and_normalize(sql: str, role: str = "user") -> str:
     try:
         ast = sqlglot.parse_one(sql, read="postgres")
     except Exception as e:
         raise SqlRejected(f"SQL parse failed: {e}")
-        
+
     # SELECT 또는 with(최종이 select인 경우) 허용
     if isinstance(ast, exp.With):
         if not isinstance(ast.this , exp.Select):
@@ -44,10 +48,11 @@ def validate_and_normalize(sql: str) -> str:
         select_node = ast
     else:
         raise SqlRejected("Only SELECT queries are allowed.")
-    
-    # 테이블 화이트리스트 검사
+
+    # role에 따른 테이블 화이트리스트 검사
+    allowed_tables = ALLOWED_TABLES_BY_ROLE.get(role, ALLOWED_TABLES_BY_ROLE["user"])
     used_tables = _extract_table_names(ast)
-    disallowed = used_tables - ALLOWED_TABLES
+    disallowed = used_tables - allowed_tables
     if disallowed:
         raise SqlRejected(f"Disallowed tables: {sorted(disallowed)}")
 

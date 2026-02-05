@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 
 class QueryRequest(BaseModel):
     question: str
+    role: str = "user"  # "user" 또는 "admin"
 
 class QueryResponse(BaseModel):
     sql: str
